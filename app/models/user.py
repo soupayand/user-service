@@ -1,4 +1,6 @@
 from ..database.connection import db
+from ..models.role import Role
+from ..models.associations import UserRole
 from werkzeug.security import generate_password_hash, check_password_hash
 import enum
 import logging

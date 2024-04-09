@@ -3,6 +3,7 @@ from .database.connection import db
 from flask_migrate import Migrate
 from .api.user import user_bp
 from dotenv import load_dotenv
+from . import models
 import os
 
 def create_app():
@@ -22,7 +23,7 @@ def create_app():
     app.register_blueprint(user_bp)
     
     # No need to call db.create_all() when using Flask-Migrate
-    with app.app_context():
-        db.create_all()
+    #with app.app_context():
+    #   db.create_all()
     
     return app

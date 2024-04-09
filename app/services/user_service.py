@@ -1,4 +1,4 @@
-from ..models.user import User
+from ..models.user import User, Role
 from ..database.connection import db
 from cachetools import TTLCache
 
@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 cache = TTLCache(maxsize=100, ttl=900)
+_DEFAULT_ROLE = "customer"
 
 def validate_user_details(user_details):
     required_keys = ["first_name", "email", "password"]
@@ -21,14 +22,17 @@ def validate_user_details(user_details):
 def add_user(user_details):
     try:
         validate_user_details(user_details)
-        first_name, last_name, email, password = user_details.values()
-        if first_name is None or email is None or password is None:
+        first_name, email, password, role = user_details.values()
+        if first_name is None or email is None or password is None or role is None or role.lower() == "admin":
             raise ValueError("Missing values for user details")
+        role = Role.query.filter_by(type=role.upper()).first()
+        if role is None:
+            raise ValueError("Error in assigning role")
         new_user = User()
         new_user.first_name = first_name
-        new_user.last_name = last_name
         new_user.email = email
         new_user.set_password(password=password)
+        new_user.roles.append(role)
         db.session.add(new_user)
         db.session.commit()
         logger.info("New user added", extra={"user":user_details})
