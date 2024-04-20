@@ -47,9 +47,9 @@ def add_user(user_details):
 def login_user(login_details) -> dict:
         try:
             if "email" not in login_details.keys() or "password" not in login_details.keys():
-                raise KeyError("Login payload doesn't contain username or password")
+                raise KeyError("Login payload doesn't contain email or password")
             email = login_details["email"]
-            user = get_user_details(email=email)
+            user = retrieve_user_details(email=email)
             password = login_details["password"]
             valid_pass = user.is_valid_password(password)
             if not valid_pass:
@@ -66,7 +66,7 @@ def login_user(login_details) -> dict:
             logger.error("Invalid login credentials")
             raise e
     
-def get_user_details(email=None, user_id=None) -> User:
+def retrieve_user_details(email=None, user_id=None) -> User:
     if email is None and user_id is None:
         raise ValueError("Either email or user_id must be provided")
 
@@ -85,7 +85,7 @@ def get_user_details(email=None, user_id=None) -> User:
         logger.info(f"Fetched user details for user from database", extra={"user": user})
     else:
         logger.info("Cache hit : User", extra={attribute: key})
-
+        
     return user
 
     
@@ -97,10 +97,11 @@ def generate_jwt(user_id, email) -> str:
             "exp" : expiration_time
         }
         secret_key = os.getenv("JWT_SECRET_KEY")
+        algo = os.getenv("JWT_HASHING_ALGORITHM")
         if secret_key is None:
             logger.error("JWT_SECRET_KEY not found in environment")
             raise ValueError("Error in token generation")
-        return jwt.encode(payload,secret_key) 
+        return jwt.encode(payload, secret_key, algorithm=algo) 
 
     
     

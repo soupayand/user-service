@@ -11,9 +11,6 @@ logger = logging.getLogger(__name__)
 
 class User(db.Model):
     
-    def __repr__(self):
-        return f'<User {self.username}>'
-    
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(120), nullable=False)
@@ -26,7 +23,11 @@ class User(db.Model):
     
     def set_password(self, password):
         try:
-            hashed_pass = hashed_pass = generate_password_hash(password, method=os.getenv("HASHING_ALGORITHM","pbkdf2:sha256"), salt_length=int(os.getenv("SALT_LENGTH","16")))
+            hashed_pass = generate_password_hash(
+            password, 
+            method=os.getenv("HASHING_ALGORITHM", "pbkdf2:sha256"),
+            salt_length=int(os.getenv("SALT_LENGTH", "16"))
+            )
             self.password_hash = hashed_pass
         except Exception as e:
             logger.error("Error in hashing password for new user", e)
@@ -40,4 +41,21 @@ class User(db.Model):
             logger.error("Error in checking stored hashed password", e)
             raise ValueError("Password entered is incorrect")
         return False
+    
+    def to_dict(self):
+        return {
+            key: value
+            for key, value in {
+                "id": self.id,
+                "first_name": self.first_name,
+                "last_name": self.last_name,
+                "email": self.email,
+                "date_of_birth": self.date_of_birth,
+                "roles": [role.type.value for role in self.roles] if self.roles else []
+            }.items()
+            if value is not None
+        }
+
+
+
     

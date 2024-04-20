@@ -1,5 +1,5 @@
 from flask import request, jsonify,Blueprint
-from ..services.user_service import add_user, login_user, get_user_details
+from ..services.user_service import add_user, login_user, retrieve_user_details
 import logging
 
 user_bp = Blueprint("user", __name__,url_prefix="/user")
@@ -21,8 +21,7 @@ def register():
     except Exception as e:
         error = str(e)
         logger.error("Error registering user", exc_info=True)
-        return jsonify({"status": "failure", "message": "User registration failed"}), 400
-
+        return jsonify({"status": "failure", "message": "User registration failed", "error": str(e)}), 400
         
 
 @user_bp.route("/login", methods=["POST"])
@@ -35,14 +34,14 @@ def login():
         logger.error("Error logging in user", exc_info=True)
         return jsonify({"status": "failure", "message": "User login failed", "error": str(e)}), 400
     
-@user_bp.route("/user/<int:user_id>", methods=["GET"])
-def login(user_id):
-    login_details = request.json
+@user_bp.route("/<int:user_id>", methods=["GET"])
+def get_user_details(user_id):
     try:
-        user = get_user_details(user_id)
+        user = retrieve_user_details(user_id=user_id)
         if user is None:
-            return jsonify({"status": "failure", "message": "User not found", "error": str(e)}), 400
-        return jsonify({"status": "success", "message" : "Successfully retrieved user", "data" : user}), 200
+            logger.error("User not found", exc_info=True)
+            raise e
+        return jsonify({"status": "success", "message" : "Successfully retrieved user", "data" : user.to_dict()}), 200
     except Exception as e:
-        logger.error("Error logging in user", exc_info=True)
-        return jsonify({"status": "failure", "message": "User not found", "error": str(e)}), 400
+        logger.error("Error fetching user details", exc_info=True)
+        return jsonify({"status": "failure", "message": "Error fetching user details", "error": str(e)}), 400

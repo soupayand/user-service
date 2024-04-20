@@ -11,7 +11,7 @@ class Role(db.Model):
     __tablename__ = "role"
     
     id = db.Column(db.Integer, primary_key = True)
-    type = db.Column(db.Enum(RoleType), nullable = False, unique=True)
+    type = db.Column(db.Enum(RoleType), nullable = False, unique=True, default = RoleType.CUSTOMER)
     description = db.Column(db.String(256), nullable = True)
     active = db.Column(db.Boolean, default=True, nullable=False)
     

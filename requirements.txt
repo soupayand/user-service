@@ -1,0 +1,9 @@
+Flask
+Flask_SQLAlchemy
+Flask_Migrate
+psycopg2-binary
+cachetools
+PyJWT
+Werkzeug
+python-dotenv
+
